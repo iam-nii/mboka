@@ -1,17 +1,51 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { SocialButton } from '../components/SocialButton';
 import { Colors } from '../constants/Colors';
 import { Typography } from '../constants/Typography';
+import { getSession, setSession } from '../utils/auth';
+import { verifyUser } from '../utils/database';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    const session = await getSession();
+    if (session) {
+      router.replace('/(tabs)');
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!identifier || !password) {
+      Alert.alert('Error', 'Please enter your email/username and password');
+      return;
+    }
+
+    setLoading(true);
+    const success = await verifyUser(identifier, password);
+    setLoading(false);
+
+    if (success) {
+      await setSession(identifier);
+      router.replace('/(tabs)');
+    } else {
+      Alert.alert('Error', 'Invalid email/username or password');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,6 +71,9 @@ export default function LoginScreen() {
               <Input
                 placeholder="Enter your email or username"
                 icon="person"
+                value={identifier}
+                onChangeText={setIdentifier}
+                autoCapitalize="none"
               />
             </View>
 
@@ -46,6 +83,8 @@ export default function LoginScreen() {
                 placeholder="Enter your password"
                 icon="lock-closed"
                 isPassword
+                value={password}
+                onChangeText={setPassword}
               />
             </View>
 
@@ -56,7 +95,12 @@ export default function LoginScreen() {
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            <Button title="Login" onPress={() => { }} style={styles.loginButton} />
+            <Button
+              title="Login"
+              onPress={handleLogin}
+              style={styles.loginButton}
+              loading={loading}
+            />
           </View>
 
           {/* Social Login Section */}
@@ -96,43 +140,41 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   container: {
-    backgroundColor: Colors.background.surface,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  logoContainer: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
   },
   logoIcon: {
-    marginRight: 8,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   logoText: {
-    fontSize: Typography.size.xl,
+    fontSize: Typography.size.xxl,
     fontWeight: Typography.weight.bold as any,
     color: Colors.text.dark,
   },
   welcomeText: {
-    fontSize: Typography.size.xxl,
+    fontSize: Typography.size.xl,
     fontWeight: Typography.weight.bold as any,
     color: Colors.text.dark,
-    textAlign: 'center',
     marginBottom: 8,
   },
   subtitleText: {
-    fontSize: Typography.size.sm,
+    fontSize: Typography.size.md,
     color: Colors.text.light,
-    textAlign: 'center',
     marginBottom: 32,
   },
   formContainer: {
+    width: '100%',
     marginBottom: 24,
   },
   inputGroup: {
@@ -151,6 +193,7 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: Colors.primary,
     fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.medium as any,
   },
   loginButton: {
     marginTop: 8,
@@ -159,6 +202,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
+    width: '100%',
   },
   divider: {
     flex: 1,
@@ -173,6 +217,7 @@ const styles = StyleSheet.create({
   socialContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    gap: 16,
     marginBottom: 32,
   },
   signUpContainer: {
