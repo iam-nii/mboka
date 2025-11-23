@@ -3,10 +3,10 @@ import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/Colors';
 
-export default function CategoriesScreen() {
+export default function MessagesScreen() {
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.text}>Categories Screen</Text>
+            <Text style={styles.text}>Messages Screen</Text>
         </SafeAreaView>
     );
 }

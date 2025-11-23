@@ -6,7 +6,7 @@ import { Button } from '../../components/Button';
 import { Colors } from '../../constants/Colors';
 import { clearSession } from '../../utils/auth';
 
-export default function AccountScreen() {
+export default function ProfileScreen() {
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -16,7 +16,7 @@ export default function AccountScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.text}>Account Screen</Text>
+            <Text style={styles.text}>Profile Screen</Text>
             <Button title="Logout" onPress={handleLogout} style={styles.logoutButton} />
         </SafeAreaView>
     );
